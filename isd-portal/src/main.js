@@ -192,14 +192,41 @@
     })();
 
   } else {
-    // Default homepage route (if someone visits root URL without #portal)
-    appRoot.className = 'min-h-[calc(100vh-80px)] bg-paper py-16 px-6 font-sans';
+    // --- FULL PUBLIC HOMEPAGE VIEW RESTORED ---
+    appRoot.className = 'min-h-[calc(100vh-80px)] bg-paper py-20 px-6 font-sans';
     appRoot.innerHTML = `
-      <div class="max-w-content mx-auto text-center space-y-6">
-        <h1 class="font-serif text-4xl text-ink-900 font-bold">Institute for Strategic Diplomacy</h1>
-        <p class="text-ink-600 text-sm max-w-xl mx-auto">Advancing global statecraft, security analysis, and international cooperation.</p>
-        <div class="pt-4">
-          <a href="#portal" class="px-6 py-3 bg-bronze-600 text-paper text-xs uppercase tracking-widest font-bold rounded shadow-xs inline-block">Access Member Portal</a>
+      <div class="max-w-content mx-auto space-y-16">
+        <div class="text-center space-y-6 max-w-3xl mx-auto">
+          <div class="w-16 h-16 mx-auto rounded-full border border-bronze-600 flex items-center justify-center bg-paper shadow-xs">
+            <span class="font-serif text-sm font-bold text-bronze-800">ISD</span>
+          </div>
+          <span class="text-xs uppercase tracking-[0.3em] text-bronze-600 font-bold">Institute for Strategic Diplomacy</span>
+          <h1 class="font-serif text-4xl md:text-5xl text-ink-900 font-bold leading-tight">
+            Advancing Sovereign &amp; Multilateral Statecraft.
+          </h1>
+          <p class="text-ink-600 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
+            An independent institutional framework for rigorous foreign policy analysis, security architecture design, and strategic advisory.
+          </p>
+          <div class="pt-2 flex flex-wrap justify-center gap-4">
+            <a href="#portal" class="px-7 py-3.5 bg-bronze-600 hover:bg-bronze-500 text-paper text-xs uppercase tracking-[0.15em] font-bold rounded transition-colors shadow-xs">
+              Access Member Portal
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-ink-200">
+          <div class="bg-ink-50/50 p-8 border border-ink-200 rounded-lg space-y-3">
+            <h3 class="font-serif text-lg font-bold text-ink-900">Strategic Research</h3>
+            <p class="text-xs text-ink-600 leading-relaxed">Conducting deep analysis on geopolitical shifts, regional stability, and international security frameworks.</p>
+          </div>
+          <div class="bg-ink-50/50 p-8 border border-ink-200 rounded-lg space-y-3">
+            <h3 class="font-serif text-lg font-bold text-ink-900">Diplomatic Training</h3>
+            <p class="text-xs text-ink-600 leading-relaxed">Equipping analysts and emerging leaders with advanced tools in statecraft, negotiation, and multilateral diplomacy.</p>
+          </div>
+          <div class="bg-ink-50/50 p-8 border border-ink-200 rounded-lg space-y-3">
+            <h3 class="font-serif text-lg font-bold text-ink-900">Executive Advisory</h3>
+            <p class="text-xs text-ink-600 leading-relaxed">Providing high-level counsel on institutional policy, governance structures, and strategic international initiatives.</p>
+          </div>
         </div>
       </div>
     `;
