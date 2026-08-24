@@ -1,84 +1,97 @@
 if (currentHash === '#portal') {
     // --- DEDICATED MEMBER PORTAL VIEW ---
     if (currentUser) {
-      let profile = null;
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-        profile = data;
-      } catch (err) {
-        console.warn("[ISD Portal] Profile query warning:", err);
-      }
-
-      const userRole = (profile?.role || currentUser?.user_metadata?.role || 'analyst').toLowerCase();
-      const displayName = profile?.full_name || currentUser.email.split('@')[0];
-      
-      // Strict definition of executive and administrative review privileges
-      const isExecutiveAdmin = ['director', 'dg', 'chief_of_staff', 'secretariat', 'institutional_secretary', 'executive_secretary'].includes(userRole);
-
+      // 1. Initial loading skeleton shell to prevent layout shift during async fetch
       appRoot.className = 'min-h-[calc(100vh-80px)] bg-ink-50 py-12';
       appRoot.innerHTML = `
         <div class="max-w-content mx-auto px-6 lg:px-10 space-y-8 font-sans">
-          
-          <!-- Personalized User Welcome Banner -->
-          <div class="bg-paper border border-ink-200 rounded-lg p-6 md:p-8 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs uppercase tracking-[0.2em] text-bronze-600 font-bold">
-                  Authorized Session
-                </span>
-                <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-ink-900 text-bronze-300 rounded">
-                  ${userRole.replace('_', ' ').toUpperCase()}
-                </span>
-              </div>
-              <h1 class="font-serif text-2xl md:text-3xl text-ink-900 mt-1 font-bold">
-                Welcome, ${displayName}
-              </h1>
-              <p class="text-ink-600 text-xs md:text-sm mt-1">
-                Institute for Strategic Diplomacy &bull; Internal Research &amp; Governance Portal
-              </p>
-            </div>
-
-            <button 
-              id="portal-logout-btn" 
-              class="px-4 py-2 text-xs font-bold text-white bg-red-800 hover:bg-red-900 rounded transition-colors cursor-pointer"
-            >
-              Sign Out
-            </button>
+          <div class="bg-paper border border-ink-200 rounded-lg p-6 md:p-8 shadow-xs">
+            <h1 class="font-serif text-2xl text-ink-900 font-bold">Loading Institutional Portal...</h1>
           </div>
-
-          <!-- Dynamic Tools Container -->
-          <div id="portal-tools-container" class="space-y-8"></div>
         </div>
       `;
 
-      appRoot.querySelector('#portal-logout-btn')?.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.hash = '#portal';
-        window.location.reload();
-      });
-
-      const toolsContainer = document.getElementById('portal-tools-container');
-      if (toolsContainer) {
-        // Render administrative review panels exclusively for authorized executives/admins
-        if (isExecutiveAdmin) {
-          const reviewWrapper = document.createElement('div');
-          toolsContainer.appendChild(reviewWrapper);
-          await renderExecutiveReviewPanel(reviewWrapper, currentUser);
-
-          const advisoryWrapper = document.createElement('div');
-          toolsContainer.appendChild(advisoryWrapper);
-          renderCorporateAdvisoryView(advisoryWrapper, currentUser);
+      // 2. Wrap async database operations inside an IIFE to satisfy Vite/ESBuild production targets
+      (async () => {
+        let profile = null;
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+          profile = data;
+        } catch (err) {
+          console.warn("[ISD Portal] Profile query warning:", err);
         }
 
-        // Every authenticated user gets their specific workspace studio
-        const writerWrapper = document.createElement('div');
-        toolsContainer.appendChild(writerWrapper);
-        renderWriterStudio(writerWrapper, currentUser);
-      }
+        const userRole = (profile?.role || currentUser?.user_metadata?.role || 'analyst').toLowerCase();
+        const displayName = profile?.full_name || currentUser.email.split('@')[0];
+        
+        // Strict definition of executive and administrative review privileges
+        const isExecutiveAdmin = ['director', 'dg', 'chief_of_staff', 'secretariat', 'institutional_secretary', 'executive_secretary'].includes(userRole);
+
+        appRoot.innerHTML = `
+          <div class="max-w-content mx-auto px-6 lg:px-10 space-y-8 font-sans">
+            
+            <!-- Personalized User Welcome Banner -->
+            <div class="bg-paper border border-ink-200 rounded-lg p-6 md:p-8 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs uppercase tracking-[0.2em] text-bronze-600 font-bold">
+                    Authorized Session
+                  </span>
+                  <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-ink-900 text-bronze-300 rounded">
+                    ${userRole.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+                <h1 class="font-serif text-2xl md:text-3xl text-ink-900 mt-1 font-bold">
+                  Welcome, ${displayName}
+                </h1>
+                <p class="text-ink-600 text-xs md:text-sm mt-1">
+                  Institute for Strategic Diplomacy &bull; Internal Research &amp; Governance Portal
+                </p>
+              </div>
+
+              <button 
+                id="portal-logout-btn" 
+                class="px-4 py-2 text-xs font-bold text-white bg-red-800 hover:bg-red-900 rounded transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+
+            <!-- Dynamic Tools Container -->
+            <div id="portal-tools-container" class="space-y-8"></div>
+          </div>
+        `;
+
+        appRoot.querySelector('#portal-logout-btn')?.addEventListener('click', async () => {
+          await supabase.auth.signOut();
+          window.location.hash = '#portal';
+          window.location.reload();
+        });
+
+        const toolsContainer = document.getElementById('portal-tools-container');
+        if (toolsContainer) {
+          // Render administrative review panels exclusively for authorized executives/admins
+          if (isExecutiveAdmin) {
+            const reviewWrapper = document.createElement('div');
+            toolsContainer.appendChild(reviewWrapper);
+            await renderExecutiveReviewPanel(reviewWrapper, currentUser);
+
+            const advisoryWrapper = document.createElement('div');
+            toolsContainer.appendChild(advisoryWrapper);
+            renderCorporateAdvisoryView(advisoryWrapper, currentUser);
+          }
+
+          // Every authenticated user gets their specific workspace studio
+          const writerWrapper = document.createElement('div');
+          toolsContainer.appendChild(writerWrapper);
+          renderWriterStudio(writerWrapper, currentUser);
+        }
+      })();
+
     } else {
       // --- DEDICATED CLEAN LOGIN PAGE EXPERIENCE (Unauthenticated) ---
       appRoot.className = 'min-h-[calc(100vh-80px)] bg-paper flex items-center justify-center py-16 px-6 font-sans';
