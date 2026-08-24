@@ -19,10 +19,21 @@ export const authService = {
     }
   },
 
-  // Log out the current session
+  // Log out the current session and thoroughly wipe local storage
   async signOut() {
     if (!supabase) return;
+    
     await supabase.auth.signOut();
+
+    // Clear all Supabase auth keys from localStorage to prevent token bleeding
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('sb-') || key.includes('supabase')) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    // Force a full reload to reset the application memory state
+    window.location.href = '/';
   },
 
   // Get current active session user
