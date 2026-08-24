@@ -1,4 +1,12 @@
-// 4. Locate or create main app view container
+// 1. Locate or create navigation container
+  let navContainer = document.getElementById('navbar');
+  if (!navContainer) {
+    navContainer = document.createElement('header');
+    navContainer.id = 'navbar';
+    document.body.prepend(navContainer);
+  }
+
+  // 2. Locate or create main app view container
   let appRoot = document.getElementById('app-root');
   if (!appRoot) {
     appRoot = document.createElement('main');
@@ -6,13 +14,13 @@
     navContainer.after(appRoot);
   }
 
-  // Define currentHash so the router can read it safely
+  // 3. Define currentHash so the router can read it safely
   const currentHash = window.location.hash;
 
   if (currentHash === '#portal') {
     // --- DEDICATED MEMBER PORTAL VIEW ---
     if (currentUser) {
-      // 1. Initial loading skeleton shell to prevent layout shift during async fetch
+      // Initial loading skeleton shell to prevent layout shift during async fetch
       appRoot.className = 'min-h-[calc(100vh-80px)] bg-ink-50 py-12';
       appRoot.innerHTML = `
         <div class="max-w-content mx-auto px-6 lg:px-10 space-y-8 font-sans">
@@ -22,7 +30,7 @@
         </div>
       `;
 
-      // 2. Wrap async database operations inside an IIFE to satisfy Vite/ESBuild production targets
+      // Wrap async database operations inside an IIFE to satisfy Vite/ESBuild production targets
       (async () => {
         let profile = null;
         try {
