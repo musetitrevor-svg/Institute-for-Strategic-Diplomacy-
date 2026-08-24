@@ -1,4 +1,15 @@
-if (currentHash === '#portal') {
+// 4. Locate or create main app view container
+  let appRoot = document.getElementById('app-root');
+  if (!appRoot) {
+    appRoot = document.createElement('main');
+    appRoot.id = 'app-root';
+    navContainer.after(appRoot);
+  }
+
+  // Define currentHash so the router can read it safely
+  const currentHash = window.location.hash;
+
+  if (currentHash === '#portal') {
     // --- DEDICATED MEMBER PORTAL VIEW ---
     if (currentUser) {
       // 1. Initial loading skeleton shell to prevent layout shift during async fetch
