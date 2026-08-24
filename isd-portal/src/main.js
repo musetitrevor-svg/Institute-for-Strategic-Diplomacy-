@@ -15,7 +15,7 @@
   }
 
   // 3. Define currentHash so the router can read it safely
-  const currentHash = window.location.hash;
+  const currentHash = window.location.hash || '#';
 
   if (currentHash === '#portal') {
     // --- DEDICATED MEMBER PORTAL VIEW ---
@@ -181,4 +181,16 @@
         }
       });
     }
+  } else {
+    // --- PUBLIC HOMEPAGE FALLBACK (Prevents Blank Screen) ---
+    appRoot.className = 'min-h-[calc(100vh-80px)] bg-paper py-16 px-6 font-sans';
+    appRoot.innerHTML = `
+      <div class="max-w-content mx-auto text-center space-y-6">
+        <h1 class="font-serif text-4xl text-ink-900 font-bold">Institute for Strategic Diplomacy</h1>
+        <p class="text-ink-600 text-sm max-w-xl mx-auto">Advancing global statecraft, security analysis, and international cooperation.</p>
+        <div class="pt-4">
+          <a href="#portal" class="px-6 py-3 bg-bronze-600 text-paper text-xs uppercase tracking-widest font-bold rounded shadow-xs inline-block">Access Member Portal</a>
+        </div>
+      </div>
+    `;
   }
