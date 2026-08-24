@@ -1,68 +1,4 @@
-import './style.css';
-import { store } from './state/store';
-import { briefsService } from './services/briefsService';
-import { authService } from './services/authService';
-import { supabase } from './config/supabaseClient';
-
-// Core Components
-import { renderNavbar } from './components/layout/Navbar';
-import { renderHeroCarousel } from './components/hero/HeroCarousel';
-import { renderLeadership } from './components/Leadership';
-import { renderDeskGrid } from './components/desks/DeskGrid';
-import { renderPublishedBriefs } from './components/PublishedBriefs';
-import { renderClientInquiryForm } from './components/ClientInquiryForm';
-
-// New Institutional Feature Components
-import { renderGeopoliticalWire } from './components/GeopoliticalWire';
-import { renderEventsHub } from './components/EventsHub';
-import { renderFellowshipPortal } from './components/FellowshipPortal';
-
-// Dashboard / Workspace Views
-import { renderWriterStudio } from './components/dashboard/WriterStudio';
-import { renderExecutiveReviewPanel } from './components/dashboard/ExecutiveReviewPanel';
-import { renderCorporateAdvisoryView } from './components/dashboard/CorporateAdvisoryView';
-
-async function initApp() {
-  console.log("[ISD Portal] Starting initialization...");
-
-  // 1. Locate or create navbar container
-  let navContainer = document.getElementById('navbar') || document.getElementById('navbar-container') || document.querySelector('header');
-  
-  if (!navContainer) {
-    navContainer = document.createElement('div');
-    navContainer.id = 'navbar';
-    document.body.prepend(navContainer);
-  }
-
-  // 2. Fetch active session user safely
-  let currentUser = null;
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    currentUser = session?.user || null;
-    console.log("[ISD Portal] Current Auth User:", currentUser ? currentUser.email : "Guest Visitor");
-  } catch (err) {
-    console.warn("[ISD Portal] Auth check error:", err);
-  }
-
-  // 3. Render Navbar
-  try {
-    await renderNavbar(navContainer, currentUser);
-    console.log("[ISD Portal] Navbar rendered successfully.");
-  } catch (err) {
-    console.error("[ISD Portal] Failed to render Navbar:", err);
-  }
-
-  // 4. Locate or create main app view container
-  let appRoot = document.getElementById('app-root');
-  if (!appRoot) {
-    appRoot = document.createElement('main');
-    appRoot.id = 'app-root';
-    navContainer.after(appRoot);
-  }
-
-  const currentHash = window.location.hash;
-
-  if (currentHash === '#portal') {
+if (currentHash === '#portal') {
     // --- DEDICATED MEMBER PORTAL VIEW ---
     if (currentUser) {
       let profile = null;
@@ -78,13 +14,16 @@ async function initApp() {
       }
 
       const userRole = (profile?.role || currentUser?.user_metadata?.role || 'analyst').toLowerCase();
-      const isExecutive = ['director', 'dg', 'chief_of_staff', 'secretariat', 'executive_secretary'].includes(userRole);
+      const displayName = profile?.full_name || currentUser.email.split('@')[0];
+      
+      // Strict definition of executive and administrative review privileges
+      const isExecutiveAdmin = ['director', 'dg', 'chief_of_staff', 'secretariat', 'institutional_secretary', 'executive_secretary'].includes(userRole);
 
       appRoot.className = 'min-h-[calc(100vh-80px)] bg-ink-50 py-12';
       appRoot.innerHTML = `
         <div class="max-w-content mx-auto px-6 lg:px-10 space-y-8 font-sans">
           
-          <!-- User Welcome Banner -->
+          <!-- Personalized User Welcome Banner -->
           <div class="bg-paper border border-ink-200 rounded-lg p-6 md:p-8 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <div class="flex items-center gap-2">
@@ -96,7 +35,7 @@ async function initApp() {
                 </span>
               </div>
               <h1 class="font-serif text-2xl md:text-3xl text-ink-900 mt-1 font-bold">
-                Welcome, ${profile?.full_name || currentUser.email.split('@')[0]}
+                Welcome, ${displayName}
               </h1>
               <p class="text-ink-600 text-xs md:text-sm mt-1">
                 Institute for Strategic Diplomacy &bull; Internal Research &amp; Governance Portal
@@ -124,7 +63,8 @@ async function initApp() {
 
       const toolsContainer = document.getElementById('portal-tools-container');
       if (toolsContainer) {
-        if (isExecutive) {
+        // Render administrative review panels exclusively for authorized executives/admins
+        if (isExecutiveAdmin) {
           const reviewWrapper = document.createElement('div');
           toolsContainer.appendChild(reviewWrapper);
           await renderExecutiveReviewPanel(reviewWrapper, currentUser);
@@ -134,12 +74,13 @@ async function initApp() {
           renderCorporateAdvisoryView(advisoryWrapper, currentUser);
         }
 
+        // Every authenticated user gets their specific workspace studio
         const writerWrapper = document.createElement('div');
         toolsContainer.appendChild(writerWrapper);
         renderWriterStudio(writerWrapper, currentUser);
       }
     } else {
-      // Dedicated Clean Login Page Experience
+      // --- DEDICATED CLEAN LOGIN PAGE EXPERIENCE (Unauthenticated) ---
       appRoot.className = 'min-h-[calc(100vh-80px)] bg-paper flex items-center justify-center py-16 px-6 font-sans';
       appRoot.innerHTML = `
         <div class="w-full max-w-md space-y-8">
@@ -208,73 +149,4 @@ async function initApp() {
         }
       });
     }
-  } else {
-    // --- PUBLIC HOMEPAGE VIEW ---
-    appRoot.className = '';
-    appRoot.innerHTML = `
-      <div id="hero-carousel"></div>
-      <div id="director-profile"></div>
-      <div id="desk-grid"></div>
-      <div id="briefs"></div>
-      <div id="wire-container"></div>
-      <div id="events-container"></div>
-      <div id="fellowship-container"></div>
-      <div id="advisory"></div>
-      <div id="about"></div>
-    `;
-
-    const heroContainer = document.getElementById('hero-carousel');
-    const directorContainer = document.getElementById('director-profile');
-    const deskContainer = document.getElementById('desk-grid');
-
-    if (heroContainer) renderHeroCarousel(heroContainer);
-    if (directorContainer) renderLeadership(directorContainer);
-    if (deskContainer) renderDeskGrid(deskContainer);
-
-    const publicationsContainer = document.getElementById('briefs');
-    if (publicationsContainer) await renderPublishedBriefs(publicationsContainer);
-
-    const wireContainer = document.getElementById('wire-container');
-    if (wireContainer) await renderGeopoliticalWire(wireContainer);
-
-    const eventsContainer = document.getElementById('events-container');
-    if (eventsContainer) await renderEventsHub(eventsContainer);
-
-    const fellowshipContainer = document.getElementById('fellowship-container');
-    if (fellowshipContainer) await renderFellowshipPortal(fellowshipContainer);
-
-    const advisoryContainer = document.getElementById('advisory');
-    if (advisoryContainer) renderClientInquiryForm(advisoryContainer);
-
-    const aboutContainer = document.getElementById('about');
-    if (aboutContainer) {
-      aboutContainer.innerHTML = `
-        <section class="py-20 bg-paper border-b border-ink-200">
-          <div class="max-w-content mx-auto px-6 lg:px-10">
-            <p class="text-xs uppercase tracking-[0.25em] text-bronze-600 font-bold font-sans mb-2">Institutional Overview</p>
-            <h2 class="font-serif text-3xl md:text-4xl text-ink-900 mb-6">About the Institute</h2>
-            <p class="font-sans text-ink-600 text-sm md:text-base leading-relaxed max-w-3xl font-light">
-              The Institute for Strategic Diplomacy (ISD) is an independent scholarly body convening career diplomats, security analysts, and economic strategists. We produce rigorous, peer-reviewed research across six specialized desks of statecraft to inform global policy and multilateral governance.
-            </p>
-          </div>
-        </section>
-      `;
-    }
-
-    try {
-      const briefs = await briefsService.getPublishedBriefs();
-      store.setState({ briefs });
-    } catch (err) {
-      console.warn("[ISD Portal] Live briefs fetch warning:", err);
-    }
   }
-
-  console.log("[ISD Portal] Initialization completed successfully.");
-}
-
-window.addEventListener('hashchange', () => {
-  initApp();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-document.addEventListener('DOMContentLoaded', initApp);
