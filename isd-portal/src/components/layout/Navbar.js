@@ -40,7 +40,7 @@ export function renderNavbar(container) {
           </a>
           
           <!-- Mobile Hamburger Toggle -->
-          <button id="mobile-menu-toggle" aria-label="Toggle Mobile Menu" class="md:hidden text-ink-900 hover:text-bronze-700 p-2">
+          <button id="mobile-menu-toggle" aria-label="Toggle Mobile Menu" class="md:hidden text-ink-900 hover:text-bronze-700 p-2 cursor-pointer">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
@@ -48,6 +48,38 @@ export function renderNavbar(container) {
         </div>
 
       </div>
+
+      <!-- Mobile Dropdown Drawer (Hidden by default) -->
+      <div id="mobile-dropdown-menu" class="hidden md:hidden bg-paper border-b border-ink-200 px-6 py-5 space-y-4 font-sans text-xs uppercase tracking-[0.15em] font-medium text-ink-800 shadow-md">
+        <a href="#briefs" class="mobile-nav-link block py-2 hover:text-bronze-700">Policy Briefs</a>
+        <a href="#desks" class="mobile-nav-link block py-2 hover:text-bronze-700">Research Desks</a>
+        <a href="#leadership" class="mobile-nav-link block py-2 hover:text-bronze-700">Leadership</a>
+        <a href="#advisory" class="mobile-nav-link block py-2 hover:text-bronze-700">Advisory</a>
+        <a href="#about" class="mobile-nav-link block py-2 hover:text-bronze-700">About</a>
+        <div class="pt-3 border-t border-ink-200">
+          <a href="#portal" class="mobile-nav-link block w-full text-center py-3 rounded bg-bronze-600 text-paper font-semibold tracking-[0.2em]">
+            Member Portal Login
+          </a>
+        </div>
+      </div>
     </header>
   `;
+
+  // Attach interactive mobile toggle behavior
+  const toggleBtn = container.querySelector('#mobile-menu-toggle');
+  const mobileMenu = container.querySelector('#mobile-dropdown-menu');
+
+  if (toggleBtn && mobileMenu) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Automatically close menu when any mobile link is tapped
+    mobileMenu.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+  }
 }
