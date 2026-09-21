@@ -12,7 +12,7 @@ export async function renderEventsHub(container) {
             <span class="text-xs uppercase tracking-[0.25em] text-bronze-600 font-bold font-sans">Forums &amp; Convenings</span>
             <h2 class="font-serif text-3xl md:text-4xl text-ink-900 mt-1">Symposiums &amp; Events</h2>
             <p class="text-ink-600 text-sm mt-1 max-w-2xl">
-              Upcoming academic symposiums, strategic roundtables, and high-level mentorship forums hosted by the Institute.
+              Upcoming conversations, roundtables, and forums from the Institute.
             </p>
           </div>
         </div>
@@ -76,8 +76,8 @@ export async function renderEventsHub(container) {
     if (error || !events || events.length === 0) {
       gridContainer.innerHTML = `
         <div class="col-span-2 p-12 text-center border border-dashed border-ink-300 rounded-lg bg-ink-50">
-          <p class="font-serif text-ink-700 text-lg">No upcoming public forums currently scheduled.</p>
-          <p class="text-xs text-ink-500 mt-1 font-sans">Check back for announcements regarding quarterly policy symposiums.</p>
+          <p class="font-serif text-ink-700 text-lg">No public events are scheduled yet.</p>
+          <p class="text-xs text-ink-500 mt-1 font-sans">New events will be announced here when dates are confirmed.</p>
         </div>
       `;
       return;

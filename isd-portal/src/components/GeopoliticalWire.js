@@ -12,7 +12,7 @@ export async function renderGeopoliticalWire(container) {
             <span class="text-xs uppercase tracking-[0.25em] text-bronze-600 font-bold font-sans">Real-Time Intelligence</span>
             <h2 class="font-serif text-3xl md:text-4xl text-ink-900 mt-1">The Geopolitical Wire</h2>
             <p class="text-ink-600 text-sm mt-1 max-w-2xl">
-              Rapid situational analyses and flash commentaries on unfolding diplomatic events and multilateral shifts.
+              Short, timely context on diplomatic developments and global shifts.
             </p>
           </div>
           <span class="text-xs font-sans text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1.5">
@@ -40,8 +40,8 @@ export async function renderGeopoliticalWire(container) {
     if (error || !wires || wires.length === 0) {
       feedContainer.innerHTML = `
         <div class="p-8 border border-dashed border-ink-300 rounded-lg bg-ink-50 text-center">
-          <p class="font-serif text-ink-800 text-base">No active wire dispatches at this hour.</p>
-          <p class="text-xs text-ink-500 mt-1 font-sans">Analysts are currently monitoring global developments.</p>
+          <p class="font-serif text-ink-800 text-base">No updates on the wire right now.</p>
+          <p class="text-xs text-ink-500 mt-1 font-sans">Our analysts are monitoring developments. Please check back soon.</p>
         </div>
       `;
       return;

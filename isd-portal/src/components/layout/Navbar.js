@@ -82,4 +82,14 @@ export function renderNavbar(container) {
       });
     });
   }
+
+  container.querySelectorAll('a[href^="#"]:not([href="#portal"])').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const targetId = link.getAttribute('href').slice(1);
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 }

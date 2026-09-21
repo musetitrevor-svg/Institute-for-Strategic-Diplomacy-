@@ -34,6 +34,7 @@ export async function renderPublishedBriefs(container) {
     const { data, error } = await supabase
       .from('policy_briefs')
       .select('*')
+      .eq('status', 'published')
       .order('created_at', { ascending: false });
 
     if (!error && data) {
@@ -56,6 +57,9 @@ export async function renderPublishedBriefs(container) {
           b.desk_name?.toLowerCase() === activeDesk.toLowerCase() || 
           b.category?.toLowerCase() === activeDesk.toLowerCase()
         );
+    const featuredBrief = activeDesk === "All Research Desks" ? filteredBriefs[0] : null;
+    const cardBriefs = featuredBrief ? filteredBriefs.slice(1) : filteredBriefs;
+    const readingTime = (brief) => `${Math.max(1, Math.ceil((brief.body || brief.abstract || '').trim().split(/\s+/).filter(Boolean).length / 220))} min read`;
 
     container.innerHTML = `
       <section id="briefs" class="py-16 px-6 lg:px-10 bg-paper border-t border-ink-200">
@@ -67,7 +71,7 @@ export async function renderPublishedBriefs(container) {
               <span class="text-xs uppercase tracking-[0.25em] text-bronze-600 font-bold font-sans">Repository & Intelligence</span>
               <h2 class="font-serif text-3xl md:text-4xl text-ink-900 mt-1">Published Policy Briefs</h2>
               <p class="text-ink-600 text-sm mt-1 max-w-2xl">
-                Strategic analysis, policy recommendations, and geopolitical assessments produced by the Institute's research desks.
+                Clear, practical analysis from the Institute's research desks.
               </p>
             </div>
             <div class="text-xs font-sans text-ink-500 uppercase tracking-wider">
@@ -99,12 +103,20 @@ export async function renderPublishedBriefs(container) {
           <!-- Brief Cards Grid -->
           ${filteredBriefs.length === 0 ? `
             <div class="p-12 text-center border border-dashed border-ink-300 rounded-lg bg-ink-50/50">
-              <p class="font-serif text-ink-700 text-lg">No briefs currently published under this desk.</p>
-              <p class="text-xs text-ink-500 mt-1 font-sans">Check back soon for upcoming peer-reviewed releases.</p>
+              <p class="font-serif text-ink-700 text-lg">There are no briefs here yet.</p>
+              <p class="text-xs text-ink-500 mt-1 font-sans">Please check back soon, or choose another research desk.</p>
             </div>
           ` : `
+            ${featuredBrief ? `
+              <article data-brief-id="${featuredBrief.id}" class="brief-card group bg-ink-900 text-paper rounded-lg p-7 md:p-9 cursor-pointer border border-ink-800 hover:border-bronze-500 transition-colors">
+                <p class="text-xs uppercase tracking-[0.18em] text-bronze-300 font-bold">Featured brief &bull; ${featuredBrief.desk_name || featuredBrief.category || 'General Policy'}</p>
+                <h3 class="font-serif text-2xl md:text-3xl mt-4 max-w-3xl">${featuredBrief.title}</h3>
+                <p class="mt-4 text-sm leading-relaxed text-ink-300 max-w-3xl">${featuredBrief.abstract || featuredBrief.body || ''}</p>
+                <div class="mt-6 pt-4 border-t border-ink-700 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-300"><span>By ${featuredBrief.author_name || 'ISD Editorial Desk'}</span><span>${new Date(featuredBrief.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span><span>${readingTime(featuredBrief)}</span></div>
+              </article>
+            ` : ''}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              ${filteredBriefs.map(brief => `
+              ${cardBriefs.map(brief => `
                 <article 
                   data-brief-id="${brief.id}"
                   class="brief-card group bg-paper border border-ink-200 hover:border-bronze-500 rounded-lg p-6 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between space-y-6 cursor-pointer relative overflow-hidden"
@@ -133,7 +145,7 @@ export async function renderPublishedBriefs(container) {
                   </div>
 
                   <div class="pt-4 border-t border-ink-100 flex items-center justify-between font-sans">
-                    <span class="text-[11px] font-semibold text-ink-700">By ${brief.author_name || 'ISD Editorial Desk'}</span>
+                    <span class="text-[11px] font-semibold text-ink-700">By ${brief.author_name || 'ISD Editorial Desk'} &bull; ${readingTime(brief)}</span>
                     <span class="text-xs font-bold text-bronze-700 group-hover:text-ink-900 transition-colors flex items-center gap-1">
                       Read Full Brief ➔
                     </span>

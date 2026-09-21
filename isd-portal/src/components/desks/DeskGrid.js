@@ -23,7 +23,7 @@ export function renderDeskGrid(container) {
             ${desks.map(desk => `
               <div 
                 data-desk-name="${desk.name ?? ''}"
-                class="desk-card group bg-paper hover:bg-ink-900 transition-colors duration-200 p-6 flex flex-col justify-between min-h-[140px] cursor-pointer"
+                class="desk-card group bg-paper hover:bg-ink-900 transition-colors duration-200 p-6 flex flex-col justify-between min-h-[190px] cursor-pointer"
               >
                 <div class="flex items-center justify-between">
                   <span class="text-[11px] tracking-[0.16em] uppercase text-bronze-600 group-hover:text-bronze-400 font-sans">
@@ -38,10 +38,13 @@ export function renderDeskGrid(container) {
                   <h3 class="font-serif text-lg text-ink-900 group-hover:text-paper transition-colors">
                     ${desk.name ?? 'Untitled Desk'}
                   </h3>
-                  <p class="font-sans text-xs text-ink-400 group-hover:text-ink-300 mt-1 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-bronze-500"></span>
-                    ${desk.head ?? ''}
-                  </p>
+                  <p class="font-sans text-xs text-ink-600 group-hover:text-ink-300 mt-2 leading-relaxed">${desk.scope ?? ''}</p>
+                  ${desk.head ? `
+                    <p class="font-sans text-xs text-ink-400 group-hover:text-ink-300 mt-3 flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-bronze-500"></span>
+                      ${desk.head}
+                    </p>
+                  ` : ''}
                 </div>
               </div>
             `).join('')}

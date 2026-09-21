@@ -106,7 +106,7 @@ export function renderWriterStudio(container, currentUser) {
   }
 
   // ==========================================
-  // TAB 1: POLICY BRIEF FORM (With Watermarking)
+  // TAB 1: POLICY BRIEF FORM
   // ==========================================
   function renderBriefForm() {
     setActiveTab(btnBrief);
@@ -172,13 +172,13 @@ export function renderWriterStudio(container, currentUser) {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-ink-100">
           <div class="space-y-2">
             <label class="block text-xs uppercase tracking-wider font-bold text-ink-700 font-sans">
-              Attach Official Document (Auto-Watermarked PDF)
+              Attach supporting document
             </label>
             <div id="file-drop-zone" class="border-2 border-dashed border-ink-300 hover:border-bronze-500 rounded-lg p-5 text-center bg-ink-50/50 cursor-pointer">
               <input type="file" id="brief-file-input" accept=".pdf,.doc,.docx" class="hidden" />
               <div id="file-prompt-container" class="space-y-2">
                 <p class="text-xs font-sans font-semibold text-ink-800">Click to choose file or drag &amp; drop here</p>
-                <p class="text-[11px] text-bronze-700 font-sans font-semibold">🛡️ PDFs get official ISD watermark</p>
+                <p class="text-[11px] text-bronze-700 font-sans font-semibold">PDFs are watermarked once, after executive approval</p>
               </div>
               <div id="file-preview-bar" class="hidden flex items-center justify-between bg-paper border border-ink-200 p-3 rounded text-left">
                 <span id="file-preview-name" class="text-xs font-bold text-ink-900 truncate font-sans"></span>
@@ -195,7 +195,7 @@ export function renderWriterStudio(container, currentUser) {
 
         <div class="pt-4 flex justify-end">
           <button type="submit" id="submit-brief-btn" class="px-6 py-3 bg-ink-900 hover:bg-bronze-600 text-paper font-sans text-xs uppercase tracking-[0.15em] font-bold rounded cursor-pointer flex items-center gap-2">
-            <span>Watermark &amp; Submit Brief</span>
+            <span>Submit for review</span>
             <span id="btn-spinner" class="hidden animate-spin">⏳</span>
           </button>
         </div>
@@ -248,16 +248,11 @@ export function renderWriterStudio(container, currentUser) {
 
       try {
         if (selectedFile) {
-          let fileToUpload = selectedFile;
-          if (selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')) {
-            showStatus(statusEl, 'Applying official ISD institutional watermark...', 'info');
-            fileToUpload = await watermarkPDF(selectedFile);
-          }
           showStatus(statusEl, 'Uploading document assets...', 'info');
-          const fileExt = fileToUpload.name.split('.').pop();
+          const fileExt = selectedFile.name.split('.').pop();
           const filePath = `briefs/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-          const { error: storageError } = await supabase.storage.from('brief-documents').upload(filePath, fileToUpload);
+          const { error: storageError } = await supabase.storage.from('brief-documents').upload(filePath, selectedFile);
           if (!storageError) {
             const { data: publicUrlData } = supabase.storage.from('brief-documents').getPublicUrl(filePath);
             uploadedFileUrl = publicUrlData?.publicUrl || uploadedFileUrl;
@@ -272,7 +267,7 @@ export function renderWriterStudio(container, currentUser) {
         }]);
 
         if (error) throw error;
-        showStatus(statusEl, 'Policy brief watermarked and submitted successfully!', 'success');
+        showStatus(statusEl, 'Policy brief submitted for executive review.', 'success');
         viewport.querySelector('#writer-brief-form').reset();
         selectedFile = null;
         filePreview.classList.add('hidden');

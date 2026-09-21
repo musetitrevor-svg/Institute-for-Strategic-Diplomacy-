@@ -19,26 +19,37 @@ export function renderHeroCarousel(container) {
           <!-- Rotating Circular Seal Badge -->
           <div class="mb-8" id="hero-rotating-seal"></div>
 
-          <!-- Subhead Tag -->
-          <p class="text-[11px] tracking-[0.25em] uppercase text-bronze-700 font-sans font-bold mb-4">
+          <!-- Institute name -->
+          <p class="text-sm text-bronze-700 font-sans font-semibold mb-4">
             Institute for Strategic Diplomacy
           </p>
 
           <!-- Main Serif Headline -->
           <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink-900 tracking-tight leading-[1.1] mb-6">
-            Advancing Sovereign &amp; Multilateral Statecraft.
+            Global affairs, made clear.
           </h1>
 
           <!-- Descriptive Paragraph -->
-          <p class="font-sans text-sm sm:text-base text-ink-600 max-w-2xl leading-relaxed font-light mb-10">
-            An independent institute convening career diplomats, security scholars, and economists to publish rigorous, policy-actionable research across six specialized desks of statecraft.
+          <p class="font-sans text-base sm:text-lg text-ink-700 max-w-2xl leading-relaxed mb-10">
+            ISD is an independent research group based in Nairobi. Our analysts, economists, and policy experts turn complex world issues into research you can trust and use.
           </p>
 
-          <!-- Call to Action Button -->
-          <div>
-            <a href="#desks" class="inline-flex items-center justify-center px-8 py-3.5 rounded text-xs uppercase tracking-[0.2em] font-bold bg-bronze-600 text-paper hover:bg-bronze-500 transition-all shadow-md shadow-bronze-600/20">
-              Explore Research Desks &rarr;
-            </a>
+          <!-- Call to Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              data-scroll-target="briefs"
+              class="inline-flex items-center justify-center px-8 py-3.5 rounded text-sm font-bold bg-bronze-600 text-paper hover:bg-bronze-500 transition-colors shadow-md shadow-bronze-600/20 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-bronze-600 focus-visible:ring-offset-2"
+            >
+              Read our latest briefs
+            </button>
+            <button
+              type="button"
+              data-scroll-target="advisory"
+              class="inline-flex items-center justify-center px-8 py-3.5 rounded text-sm font-bold border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-paper transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-bronze-600 focus-visible:ring-offset-2"
+            >
+              Work with us
+            </button>
           </div>
         </div>
       </div>
@@ -50,4 +61,14 @@ export function renderHeroCarousel(container) {
   if (sealContainer) {
     sealContainer.innerHTML = renderIsdLiveLogo();
   }
+
+  // Smooth-scroll buttons. Using scrollIntoView (not #anchor links) because
+  // changing the hash triggers the hashchange handler in main.js, which
+  // re-renders the whole page and jumps back to the top.
+  container.querySelectorAll('[data-scroll-target]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.getAttribute('data-scroll-target'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 }

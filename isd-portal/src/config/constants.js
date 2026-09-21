@@ -37,12 +37,12 @@ export const HERO_SLIDES = [
 // SAME surface treatment. Differentiation comes from label and icon,
 // not from a different color per card.
 export const DESKS = [
-  { id: 'foreign-policy', name: 'Foreign Policy', head: 'Rebecca Wanjiku', category: 'Statecraft' },
-  { id: 'global-security', name: 'Global Security', head: 'George Ndungu', category: 'Statecraft' },
-  { id: 'ipe-development', name: 'IPE & Development', head: 'Derick Abuti', category: 'Academic' },
-  { id: 'multilateralism', name: 'Multilateralism', head: 'Penina Maina', category: 'Academic' },
-  { id: 'cyber-diplomacy', name: 'Cyber Diplomacy', head: 'Lordin Maangi', category: 'Statecraft' },
-  { id: 'diplomatic-practice', name: 'Diplomatic Practice', head: 'Stanley Kasuti', category: 'Academic' },
+  { id: 'foreign-policy', name: 'Foreign Policy', head: 'Rebecca Wanjiku', category: 'Statecraft', scope: 'Foreign policy choices, regional partnerships, and diplomatic strategy.' },
+  { id: 'global-security', name: 'Global Security', head: 'George Ndungu', category: 'Statecraft', scope: 'Security risks, conflict, defence, and regional stability.' },
+  { id: 'ipe-development', name: 'IPE & Development', head: 'Derick Abuti', category: 'Academic', scope: 'Trade, investment, development, and economic power.' },
+  { id: 'multilateralism', name: 'Multilateralism', head: 'Penina Maina', category: 'Academic', scope: 'International institutions, cooperation, and global governance.' },
+  { id: 'cyber-diplomacy', name: 'Cyber Diplomacy', head: 'Lordin Maangi', category: 'Statecraft', scope: 'Digital governance, cyber norms, and technology policy.' },
+  { id: 'diplomatic-practice', name: 'Diplomatic Practice', head: '', category: 'Academic', scope: 'The tools, skills, and practice of effective diplomacy.' },
 ];
 
 export const NAV_LINKS = [
