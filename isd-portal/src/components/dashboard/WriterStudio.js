@@ -105,6 +105,63 @@ export function renderWriterStudio(container, currentUser) {
     activeBtn.className = "px-3 py-1.5 rounded font-bold bg-ink-900 text-paper transition-all cursor-pointer";
   }
 
+  function escapeHtml(value = '') {
+    const element = document.createElement('div');
+    element.textContent = value;
+    return element.innerHTML;
+  }
+
+  async function loadPublishedItems({ table, listId, emptyMessage, dateField = 'created_at' }) {
+    const list = viewport.querySelector(`#${listId}`);
+    if (!list) return;
+
+    list.innerHTML = '<p class="text-xs text-ink-500 font-sans animate-pulse">Loading published items...</p>';
+    const { data: items, error } = await supabase
+      .from(table)
+      .select('*')
+      .order(dateField, { ascending: false });
+
+    if (error) {
+      list.innerHTML = `<p class="text-xs text-red-700 font-sans">Could not load items: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!items?.length) {
+      list.innerHTML = `<p class="text-xs text-ink-500 font-sans">${emptyMessage}</p>`;
+      return;
+    }
+
+    list.innerHTML = items.map(item => `
+      <div class="flex items-center justify-between gap-4 rounded border border-ink-200 bg-ink-50/50 px-3 py-2.5">
+        <div class="min-w-0">
+          <p class="truncate font-serif text-sm font-bold text-ink-900">${escapeHtml(item.title)}</p>
+          <p class="mt-0.5 text-[11px] text-ink-500 font-sans">${item[dateField] ? new Date(item[dateField]).toLocaleString() : 'Date unavailable'}</p>
+        </div>
+        <button type="button" data-delete-id="${item.id}" class="delete-published-item shrink-0 rounded border border-red-200 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-700 hover:bg-red-50 cursor-pointer">
+          Delete
+        </button>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.delete-published-item').forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.dataset.deleteId;
+        if (!window.confirm('Delete this item permanently? This cannot be undone.')) return;
+
+        button.disabled = true;
+        button.textContent = 'Deleting...';
+        const { error: deleteError } = await supabase.from(table).delete().eq('id', id);
+        if (deleteError) {
+          button.disabled = false;
+          button.textContent = 'Delete';
+          window.alert(`Could not delete this item: ${deleteError.message}`);
+          return;
+        }
+        await loadPublishedItems({ table, listId, emptyMessage, dateField });
+      });
+    });
+  }
+
   // ==========================================
   // TAB 1: POLICY BRIEF FORM
   // ==========================================
@@ -320,7 +377,21 @@ export function renderWriterStudio(container, currentUser) {
           Publish Wire Dispatch Live
         </button>
       </form>
+
+      <div class="border-t border-ink-200 pt-5 space-y-3">
+        <div>
+          <h3 class="font-serif text-base font-bold text-ink-900">Published Wire Dispatches</h3>
+          <p class="text-[11px] text-ink-500 font-sans">Delete a dispatch that should no longer appear on the public wire.</p>
+        </div>
+        <div id="wire-published-list" class="space-y-2"></div>
+      </div>
     `;
+
+    loadPublishedItems({
+      table: 'geopolitical_wire',
+      listId: 'wire-published-list',
+      emptyMessage: 'No wire dispatches have been published yet.'
+    });
 
     viewport.querySelector('#create-wire-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -352,6 +423,11 @@ export function renderWriterStudio(container, currentUser) {
         if (error) throw error;
         showStatus(statusEl, 'Wire dispatch broadcasted live successfully!', 'success');
         document.getElementById('create-wire-form').reset();
+        loadPublishedItems({
+          table: 'geopolitical_wire',
+          listId: 'wire-published-list',
+          emptyMessage: 'No wire dispatches have been published yet.'
+        });
       } catch (err) {
         showStatus(statusEl, 'Error: ' + err.message, 'error');
       } finally {
@@ -400,7 +476,22 @@ export function renderWriterStudio(container, currentUser) {
           Schedule Symposium Publicly
         </button>
       </form>
+
+      <div class="border-t border-ink-200 pt-5 space-y-3">
+        <div>
+          <h3 class="font-serif text-base font-bold text-ink-900">Scheduled Symposiums</h3>
+          <p class="text-[11px] text-ink-500 font-sans">Delete an event that should no longer appear on the public schedule.</p>
+        </div>
+        <div id="event-published-list" class="space-y-2"></div>
+      </div>
     `;
+
+    loadPublishedItems({
+      table: 'institute_events',
+      listId: 'event-published-list',
+      emptyMessage: 'No symposium events have been scheduled yet.',
+      dateField: 'event_date'
+    });
 
     viewport.querySelector('#create-event-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -432,6 +523,12 @@ export function renderWriterStudio(container, currentUser) {
         if (error) throw error;
         showStatus(statusEl, 'Symposium successfully scheduled!', 'success');
         document.getElementById('create-event-form').reset();
+        loadPublishedItems({
+          table: 'institute_events',
+          listId: 'event-published-list',
+          emptyMessage: 'No symposium events have been scheduled yet.',
+          dateField: 'event_date'
+        });
       } catch (err) {
         showStatus(statusEl, 'Error: ' + err.message, 'error');
       } finally {
