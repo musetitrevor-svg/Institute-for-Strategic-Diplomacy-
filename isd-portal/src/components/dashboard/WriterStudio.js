@@ -150,13 +150,25 @@ export function renderWriterStudio(container, currentUser) {
 
         button.disabled = true;
         button.textContent = 'Deleting...';
-        const { error: deleteError } = await supabase.from(table).delete().eq('id', id);
+        const { data: deletedItems, error: deleteError } = await supabase
+          .from(table)
+          .delete()
+          .eq('id', id)
+          .select('id');
         if (deleteError) {
           button.disabled = false;
           button.textContent = 'Delete';
           window.alert(`Could not delete this item: ${deleteError.message}`);
           return;
         }
+
+        if (!deletedItems?.length) {
+          button.disabled = false;
+          button.textContent = 'Delete';
+          window.alert('Nothing was deleted. Your Supabase Row Level Security policy may not allow this account to delete the item.');
+          return;
+        }
+
         await loadPublishedItems({ table, listId, emptyMessage, dateField });
       });
     });
