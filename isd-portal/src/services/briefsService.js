@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient';
+
 export const briefsService = {
   async getPublishedBriefs() {
     if (!supabase) {
@@ -10,7 +11,7 @@ export const briefsService = {
       const { data, error } = await supabase
         .from('briefs')
         .select('*')
-        .eq('status', 'published')
+        .in('status', ['published', 'Published', 'approved', 'Approved', 'live'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
