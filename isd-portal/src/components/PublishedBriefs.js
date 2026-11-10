@@ -31,19 +31,44 @@ export async function renderPublishedBriefs(container) {
 
   let briefs = [];
   try {
-    const { data, error } = await supabase
+    const validStatuses = ['published', 'Published', 'approved', 'Approved', 'live'];
+
+    // 1. Fetch from 'policy_briefs' table
+    const { data: policyData } = await supabase
       .from('policy_briefs')
       .select('*')
-      .eq('status', 'published')
+      .in('status', validStatuses)
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      briefs = data.filter(b => 
-        b.title && 
-        !b.title.toLowerCase().includes('test') && 
-        !b.abstract?.toLowerCase().includes('test')
-      );
-    }
+    // 2. Fetch from 'briefs' table to catch newly created portal briefs
+    const { data: directBriefsData } = await supabase
+      .from('briefs')
+      .select('*')
+      .in('status', validStatuses)
+      .order('created_at', { ascending: false });
+
+    // Merge results from both tables seamlessly without duplicate IDs
+    const combinedData = [...(policyData || []), ...(directBriefsData || [])];
+    const uniqueMap = new Map();
+    
+    combinedData.forEach(b => {
+      if (b.id && !uniqueMap.has(String(b.id))) {
+        uniqueMap.set(String(b.id), b);
+      }
+    });
+
+    const mergedList = Array.from(uniqueMap.values()).sort(
+      (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    );
+
+    // FIXED: Only exclude exact dummy titles like "test" or "test brief", 
+    // permitting official titles containing the word "test" (e.g. "The Coming Test for East Africa")
+    briefs = mergedList.filter(b => {
+      if (!b.title) return false;
+      const cleanTitle = b.title.trim().toLowerCase();
+      return cleanTitle !== 'test' && cleanTitle !== 'test brief';
+    });
+
   } catch (err) {
     console.error("Error fetching briefs:", err);
   }
