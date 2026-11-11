@@ -1,6 +1,11 @@
+// src/components/ClientInquiryForm.js
 import { supabase } from '../config/supabaseClient';
 
+const TARGET_NOTIFICATION_EMAIL = "info@instituteforstrategicdiplomacy.org";
+
 export function renderClientInquiryForm(container) {
+  if (!container) return;
+
   container.innerHTML = `
     <section class="bg-ink-900 text-white py-16 px-6 lg:px-10 border-t border-ink-800">
       <div class="max-w-content mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -119,11 +124,33 @@ export function renderClientInquiryForm(container) {
       email: document.getElementById('inquiry-email').value.trim(),
       service_tier: document.getElementById('inquiry-tier').value,
       project_scope: document.getElementById('inquiry-scope').value.trim(),
+      created_at: new Date().toISOString()
     };
 
     try {
+      // 1. Store in Supabase DB
       const { error } = await supabase.from('client_inquiries').insert([payload]);
       if (error) throw error;
+
+      // 2. Real-time Email Alert Notification Dispatch
+      try {
+        await fetch('https://formspree.io/f/mqakozpl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            _to: TARGET_NOTIFICATION_EMAIL,
+            subject: `[ISD Advisory Lead] ${payload.service_tier} Request from ${payload.company_name}`,
+            company: payload.company_name,
+            contact_person: payload.contact_person,
+            client_email: payload.email,
+            service: payload.service_tier,
+            scope: payload.project_scope,
+            timestamp: new Date().toLocaleString()
+          })
+        });
+      } catch (dispatchErr) {
+        console.warn("Real-time notification dispatch warning:", dispatchErr);
+      }
 
       feedback.innerHTML = `
         <div class="p-3 bg-green-50 border border-green-200 text-green-800 rounded font-medium">
