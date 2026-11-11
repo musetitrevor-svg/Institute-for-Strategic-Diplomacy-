@@ -60,31 +60,33 @@ export function openBriefModal(brief) {
         </div>
       </div>
 
-      <!-- Scrollable Container with Embedded Watermark -->
+      <!-- Scrollable Container with Embedded Watermark Engine -->
       <div class="p-6 md:p-12 overflow-y-auto space-y-6 font-serif relative">
         
-        <!-- INSTITUTIONAL WATERMARK OVERLAY -->
-        <div class="pointer-events-none select-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.04] z-0">
-          <div class="text-center transform -rotate-12 space-y-8">
-            <!-- Large ISD Diplomatic Star Emblem -->
-            <svg class="w-96 h-96 mx-auto text-ink-900" viewBox="0 0 100 100" fill="currentColor">
+        <!-- SINGLE DYNAMIC EXECUTIVE SEAL OVERLAY -->
+        <div class="pointer-events-none select-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.035] z-0">
+          <div class="text-center transform -rotate-12 space-y-6">
+            <!-- ISD Diplomatic Emblem -->
+            <svg class="w-80 h-80 md:w-96 md:h-96 mx-auto text-ink-900" viewBox="0 0 100 100" fill="currentColor">
               <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2" />
               <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2" />
-              <text x="50" y="55" font-family="serif" font-size="22" font-weight="bold" text-anchor="middle">ISD</text>
-              <!-- 12 Stars Circle -->
-              ${[0,30,60,90,120,150,180,210,240,270,300,330].map(angle => {
+              <text x="50" y="54" font-family="serif" font-size="20" font-weight="bold" text-anchor="middle">ISD</text>
+              <!-- 12 Diplomatic Stars Ring -->
+              ${[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => {
                 const rad = (angle * Math.PI) / 180;
                 const x = 50 + 34 * Math.cos(rad);
                 const y = 50 + 34 * Math.sin(rad);
-                return `<circle cx="${x}" cy="${y}" r="2" fill="currentColor" />`;
+                return `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.8" fill="currentColor" />`;
               }).join('')}
             </svg>
-            <p class="font-mono text-xl font-bold uppercase tracking-[0.4em] text-ink-900">
-              INSTITUTE FOR STRATEGIC DIPLOMACY
-            </p>
-            <p class="font-sans text-xs uppercase tracking-[0.3em] font-semibold text-ink-900">
-              OFFICIAL RESEARCH RECORD • VERIFIED POLICY BRIEF
-            </p>
+            <div class="space-y-1">
+              <p class="font-mono text-lg md:text-xl font-bold uppercase tracking-[0.35em] text-ink-900">
+                INSTITUTE FOR STRATEGIC DIPLOMACY
+              </p>
+              <p class="font-sans text-[11px] uppercase tracking-[0.25em] font-semibold text-bronze-700">
+                OFFICIAL EXECUTIVE SEAL • VERIFIED RESEARCH RECORD
+              </p>
+            </div>
           </div>
         </div>
 
