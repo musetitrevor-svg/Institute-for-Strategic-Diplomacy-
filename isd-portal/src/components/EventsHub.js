@@ -1,6 +1,9 @@
 // src/components/EventsHub.js
 import { supabase } from '../config/supabaseClient';
 
+// Designated target inbox for executive event notifications
+const TARGET_NOTIFICATION_EMAIL = "info@instituteforstrategicdiplomacy.org";
+
 export async function renderEventsHub(container) {
   if (!container) return;
 
@@ -32,7 +35,7 @@ export async function renderEventsHub(container) {
             <span class="text-[10px] uppercase font-bold tracking-widest text-bronze-600 font-sans">Official Accreditation</span>
             <h3 id="modal-event-title" class="font-serif text-lg font-bold text-ink-900">Secure Symposium Seat</h3>
           </div>
-          <button id="close-rsvp-modal" class="text-ink-400 hover:text-ink-900 text-lg font-bold">&times;</button>
+          <button id="close-rsvp-modal" class="text-ink-400 hover:text-ink-900 text-lg font-bold cursor-pointer">&times;</button>
         </div>
 
         <form id="rsvp-form" class="space-y-4">
@@ -126,23 +129,48 @@ export async function renderEventsHub(container) {
     console.error("Events fetch error:", err);
   }
 
-  // Handle RSVP Submission
+  // Handle RSVP Submission with Database Storage and Direct Notification
   rsvpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = document.getElementById('rsvp-submit-btn');
+    const attendeeName = document.getElementById('attendee-name').value.trim();
+    const attendeeEmail = document.getElementById('attendee-email').value.trim();
+    const eventTitle = modalTitle.textContent;
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Transmitting Credentials...';
 
     try {
+      // 1. Store in Supabase DB
       const { error } = await supabase.from('event_rsvps').insert([{
         event_id: modalEventIdInput.value,
-        attendee_name: document.getElementById('attendee-name').value.trim(),
-        attendee_email: document.getElementById('attendee-email').value.trim()
+        attendee_name: attendeeName,
+        attendee_email: attendeeEmail,
+        created_at: new Date().toISOString()
       }]);
 
       if (error) throw error;
 
-      rsvpFeedback.textContent = "Accreditation secured successfully! Check your email for pass details.";
+      // 2. Dispatch Direct Email Notification Trigger
+      try {
+        await fetch('https://formspree.io/f/mqakozpl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            _to: TARGET_NOTIFICATION_EMAIL,
+            subject: `[ISD Event RSVP Alert] New Accreditation: ${attendeeName}`,
+            event: eventTitle,
+            name: attendeeName,
+            email: attendeeEmail,
+            timestamp: new Date().toLocaleString()
+          })
+        });
+      } catch (dispatchErr) {
+        console.warn("Notification dispatch warning:", dispatchErr);
+      }
+
+      // 3. Render Success Feedback
+      rsvpFeedback.textContent = "Accreditation secured successfully! Invitation details dispatched.";
       rsvpFeedback.className = "text-xs text-center font-sans text-emerald-600 font-bold";
       rsvpFeedback.classList.remove('hidden');
       
